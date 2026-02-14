@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NZ Unclaimed Money - Customer Portal & Agent System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .gradient-text { background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .input-field { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.2); color: white; transition: all 0.3s; }
+        .input-field:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1); outline: none; }
+        .step-active { background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .authority-box { background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%); border: 2px solid rgba(59, 130, 246, 0.3); }
+        .signature-pad { background: white; border-radius: 8px; cursor: crosshair; }
+        .upload-zone { border: 2px dashed rgba(148, 163, 184, 0.3); transition: all 0.3s; }
+        .upload-zone:hover { border-color: #60a5fa; background: rgba(96, 165, 250, 0.05); }
+        .upload-zone.has-file { border-color: #34d399; background: rgba(52, 211, 153, 0.1); }
+        .image-preview { max-height: 200px; object-fit: contain; border-radius: 8px; }
+        .doc-preview { max-height: 150px; object-fit: cover; border-radius: 6px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- MODE SELECTOR (Customer vs Agent) -->
+    <div id="modeSelector" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl p-8 max-w-2xl w-full text-center">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-display font-bold text-white mb-4">NZ Unclaimed Money Recovery</h1>
+            <p class="text-slate-400 mb-8">Select how you want to use this system</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="setMode('customer')" class="group bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-6 transition-all hover:border-blue-500/50">
+                    <div class="w-12 h-12 bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-600 transition-colors">
+                        <svg class="w-6 h-6 text-blue-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <h3 class="text-white font-semibold mb-1">I'm a Customer</h3>
+                    <p class="text-sm text-slate-400">Search for my unclaimed money and authorize an agent to claim it for me</p>
+                </button>
+                
+                <button onclick="setMode('agent')" class="group bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-6 transition-all hover:border-emerald-500/50">
+                    <div class="w-12 h-12 bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-emerald-600 transition-colors">
+                        <svg class="w-6 h-6 text-emerald-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <h3 class="text-white font-semibold mb-1">I'm an Agent</h3>
+                    <p class="text-sm text-slate-400">Access customer submissions and manage claims on their behalf</p>
+                </button>
+            </div>
+            
+            <div class="mt-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                <p class="text-xs text-slate-500">
+                    <span class="text-emerald-400 font-semibold">Legal:</span> This system complies with IRD OS 25/03 Authority to Act requirements. 
+                    Customers must provide explicit authorization before agents can act on their behalf.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER PORTAL -->
+    <div id="customerPortal" class="hidden">
+        <!-- Navigation -->
+        <nav class="glass-panel sticky top-0 z-40 border-b border-slate-700/50">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <span class="font-display font-bold text-xl">Find<span class="text-emerald-400">My</span>Money</span>
+                </div>
+                <button onclick="location.reload()" class="text-sm text-slate-400 hover:text-white">Switch to Agent View</button>
+            </div>
+        </nav>
+
+        <main class="max-w-4xl mx-auto px-4 py-8">
+            
+            <!-- Step Indicator -->
+            <div class="flex items-center justify-between mb-8 relative">
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-700 -z-10 rounded-full"></div>
+                <div class="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-400 -z-10 rounded-full transition-all duration-500" id="customerProgress" style="width: 0%"></div>
+                
+                <div class="step-indicator w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold step-active" data-step="1">1</div>
+                <div class="step-indicator w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold" data-step="2">2</div>
+                <div class="step-indicator w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold" data-step="3">3</div>
+                <div class="step-indicator w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold" data-step="4">4</div>
+            </div>
+            <div class="flex justify-between text-xs text-slate-400 mb-8">
+                <span>Search IRD</span>
+                <span>Your Details</span>
+                <span>Upload ID</span>
+                <span>Authority</span>
+            </div>
+
+            <!-- STEP 1: Search IRD -->
+            <div id="custStep1" class="step-content fade-in">
+                <div class="glass-panel rounded-2xl p-8 text-center mb-6">
+                    <h2 class="text-2xl font-bold text-white mb-4">Search IRD Unclaimed Money Database</h2>
+                    <p class="text-slate-400 mb-6">Enter your name exactly as it appears on your IRD records. Include any previous names (maiden names, etc.) in separate searches.</p>
+                    
+                    <div class="max-w-xl mx-auto space-y-4">
+                        <div class="relative">
+                            <input type="text" id="customerSearchName" placeholder="Your full legal name..." 
+                                class="input-field w-full px-6 py-4 rounded-xl text-lg text-center"
+                                onkeypress="if(event.key==='Enter')performCustomerSearch()">
+                        </div>
+                        <button onclick="performCustomerSearch()" class="w-full bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/25 transition-all">
+                            Search Official IRD Database
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center gap-4 text-xs text-slate-500">
+                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Direct IRD Link</span>
+                        <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Secure & Private</span>
+                    </div>
+                </div>
+
+                <!-- IRD iFrame Alternative -->
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-3">Or Search Directly on IRD Website</h3>
+                    <p class="text-sm text-slate-400 mb-4">If you prefer, you can search directly on IRD's official website and return here to authorize us to claim on your behalf.</p>
+                    <a href="https://www.ird.govt.nz/unclaimedmoney/claiming-unclaimed-money/search-the-database" target="_blank" 
+                        class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-medium transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Open Official IRD Search
+                    </a>
+                </div>
+
+                <!-- Search Results -->
+                <div id="customerSearchResults" class="hidden mt-6 space-y-4">
+                    <h3 class="text-lg font-semibold text-white mb-3">Search Results Found</h3>
+                    <div id="customerResultsList" class="space-y-3"></div>
+                    <button onclick="customerNextStep()" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-semibold transition-colors">
+                        I Found My Money - Continue to Claim
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Customer Details -->
+            <div id="custStep2" class="step-content hidden fade-in">
+                <div class="glass-panel rounded-2xl p-8">
+                    <h2 class="text-2xl font-bold text-white mb-6">Your Information</h2>
+                    <p class="text-slate-400 mb-6">This information is required by IRD to process your claim. We need to verify your identity.</p>
+                    
+                    <form id="customerDetailsForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-300">Full Legal Name <span class="text-red-400">*</span></label>
+                                <input type="text" name="fullName" required class="input-field w-full px-4 py-3 rounded-xl" placeholder="As shown on IRD records">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-300">IRD Number <span class="text-red-400">*</span></label>
+                                <input type="text" name="irdNumber" required pattern="\d{8,9}" class="input-field w-full px-4 py-3 rounded-xl" placeholder="8-9 digits">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-300">Date of Birth <span class="text-red-400">*</span></label>
+                                <input type="date" name="dob" required class="input-field w-full px-4 py-3 rounded-xl">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-300">Phone Number <span class="text-red-400">*</span></label>
+                                <input type="tel" name="phone" required class="input-field w-full px-4 py-3 rounded-xl" placeholder="021 123 4567">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-300">Email Address <span class="text-red-400">*</span></label>
+                            <input type="email" name="email" required class="input-field w-full px-4 py-3 rounded-xl" placeholder="your@email.com">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-300">Current Residential Address <span class="text-red-400">*</span></label>
+                            <textarea name="currentAddress" required rows="2" class="input-field w-full px-4 py-3 rounded-xl" placeholder="Full address"></textarea>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-300">Previous Addresses (when money was held)</label>
+                            <textarea name="previousAddresses" rows="2" class="input-field w-full px-4 py-3 rounded-xl" placeholder="Addresses where you lived when the account was active"></textarea>
+                            <p class="text-xs text-slate-500">This helps IRD verify your connection to the money</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-300">Bank Account for Refund <span class="text-red-400">*</span></label>
+                                <input type="text" name="bankAccount" required pattern="\d{2}-\d{4}-\d{7}-\d{2,3}" class="input-field w-full px-4 py-3 rounded-xl" placeholder="01-1234-1234567-12">
+                                <p class="text-xs text-slate-500">Format: XX-XXXX-XXXXXXX-XX</p>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-300">Bank Name <span class="text-red-400">*</span></label>
+                                <select name="bankName" required class="input-field w-full px-4 py-3 rounded-xl bg-slate-800">
+                                    <option value="">Select Bank</option>
+                                    <option value="ANZ">ANZ Bank</option>
+                                    <option value="ASB">ASB Bank</option>
+                                    <option value="BNZ">BNZ</option>
+                                    <option value="Westpac">Westpac</option>
+                                    <option value="Kiwibank">Kiwibank</option>
+                                    <option value="TSB">TSB Bank</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" onclick="customerPrevStep()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-medium transition-colors">Back</button>
+                            <button type="button" onclick="validateAndNext()" class="flex-1 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition-all">Continue to Upload ID</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- STEP 3: ID Document Upload -->
+            <div id="custStep3" class="step-content hidden fade-in">
+                <div class="glass-panel rounded-2xl p-8">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="w-12 h-12 bg-amber-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Upload Photo ID</h2>
+                            <p class="text-slate-400">IRD requires photo identification to process unclaimed money claims. This helps prevent fraud and ensures money goes to the rightful owner.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Primary ID Upload -->
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-slate-300">Primary Photo ID <span class="text-red-400">*</span></label>
+                            <p class="text-xs text-slate-500 mb-2">Driver License, Passport, or Kiwi Access Card (must be current)</p>
+                            
+                            <div id="primaryIDZone" class="upload-zone rounded-xl p-8 text-center cursor-pointer relative" onclick="document.getElementById('primaryIDInput').click()">
+                                <input type="file" id="primaryIDInput" class="hidden" accept="image/*" onchange="handleIDUpload(this, 'primary')">
+                                <div id="primaryIDPreview" class="hidden mb-4">
+                                    <img id="primaryIDImg" class="image-preview mx-auto shadow-lg" alt="ID Preview">
+                                </div>
+                                <div id="primaryIDPlaceholder">
+                                    <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    </div>
+                                    <p class="text-white font-medium mb-1">Click to upload Photo ID</p>
+                                    <p class="text-sm text-slate-500">or drag and drop</p>
+                                    <p class="text-xs text-slate-600 mt-2">JPG, PNG • Max 5MB</p>
+                                </div>
+                                <button type="button" id="primaryIDRemove" onclick="event.stopPropagation(); removeID('primary')" class="hidden absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white p-2 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-500">This must show your name, photo, and be clearly readable</p>
+                        </div>
+
+                        <!-- Secondary ID Upload -->
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-slate-300">Secondary ID <span class="text-slate-400">(Optional but recommended)</span></label>
+                            <p class="text-xs text-slate-500 mb-2">Bank card, Community Services Card, or another form of ID</p>
+                            
+                            <div id="secondaryIDZone" class="upload-zone rounded-xl p-6 text-center cursor-pointer relative" onclick="document.getElementById('secondaryIDInput').click()">
+                                <input type="file" id="secondaryIDInput" class="hidden" accept="image/*" onchange="handleIDUpload(this, 'secondary')">
+                                <div id="secondaryIDPreview" class="hidden mb-4">
+                                    <img id="secondaryIDImg" class="doc-preview mx-auto shadow-lg" alt="Secondary ID Preview">
+                                </div>
+                                <div id="secondaryIDPlaceholder">
+                                    <svg class="w-6 h-6 text-slate-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                    <p class="text-sm text-slate-400">Upload additional ID</p>
+                                </div>
+                                <button type="button" id="secondaryIDRemove" onclick="event.stopPropagation(); removeID('secondary')" class="hidden absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white p-2 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Proof of Address -->
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-slate-300">Proof of Address <span class="text-slate-400">(Optional)</span></label>
+                            <p class="text-xs text-slate-500 mb-2">Utility bill, bank statement, or government letter (last 3 months) - Required if address has changed</p>
+                            
+                            <div id="addressProofZone" class="upload-zone rounded-xl p-6 text-center cursor-pointer relative" onclick="document.getElementById('addressProofInput').click()">
+                                <input type="file" id="addressProofInput" class="hidden" accept="image/*" onchange="handleIDUpload(this, 'address')">
+                                <div id="addressProofPreview" class="hidden mb-4">
+                                    <img id="addressProofImg" class="doc-preview mx-auto shadow-lg" alt="Address Proof Preview">
+                                </div>
+                                <div id="addressProofPlaceholder">
+                                    <svg class="w-6 h-6 text-slate-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                    <p class="text-sm text-slate-400">Upload proof of address</p>
+                                </div>
+                                <button type="button" id="addressProofRemove" onclick="event.stopPropagation(); removeID('address')" class="hidden absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white p-2 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ID Verification Checklist -->
+                        <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                            <h4 class="text-sm font-semibold text-white mb-3">Before continuing, please confirm:</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="idClearCheck" class="mt-1 w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500 bg-slate-700">
+                                    <span class="text-sm text-slate-300 group-hover:text-white transition-colors">My ID photo is clear and not blurry</span>
+                                </label>
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="idCurrentCheck" class="mt-1 w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500 bg-slate-700">
+                                    <span class="text-sm text-slate-300 group-hover:text-white transition-colors">My ID is current and not expired</span>
+                                </label>
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="idMatchesCheck" class="mt-1 w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500 bg-slate-700">
+                                    <span class="text-sm text-slate-300 group-hover:text-white transition-colors">The name on my ID matches my IRD records exactly</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 flex gap-3">
+                            <button onclick="customerPrevStep()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-medium transition-colors">Back</button>
+                            <button onclick="validateIDAndNext()" class="flex-1 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition-all">Continue to Authorization</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Authority to Act -->
+            <div id="custStep4" class="step-content hidden fade-in">
+                <div class="authority-box rounded-2xl p-8 mb-6">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="w-12 h-12 bg-blue-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Authority to Act on Your Behalf</h2>
+                            <p class="text-slate-300">By signing below, you legally authorize us to act as your agent and claim your unclaimed money from IRD. This complies with IRD Operational Statement OS 25/03.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/50 rounded-xl p-6 space-y-4 text-sm">
+                        <h3 class="font-semibold text-white mb-3">You are authorizing the agent to:</h3>
+                        <ul class="space-y-2 text-slate-300">
+                            <li class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Obtain your information from IRD through all channels, including online services</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Submit claims for unclaimed money on your behalf</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Receive correspondence from IRD regarding your claim</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Provide additional evidence and information as required by IRD</span>
+                            </li>
+                        </ul>
+
+                        <div class="border-t border-slate-700 pt-4 mt-4">
+                            <h3 class="font-semibold text-white mb-2">Agent Details:</h3>
+                            <p class="text-slate-300"><span class="text-slate-400">Agency Name:</span> [Your Agency Name]</p>
+                            <p class="text-slate-300"><span class="text-slate-400">Agent Name:</span> [Your Name]</p>
+                            <p class="text-slate-300"><span class="text-slate-400">Contact:</span> [Your Email/Phone]</p>
+                        </div>
+
+                        <div class="border-t border-slate-700 pt-4">
+                            <h3 class="font-semibold text-white mb-2">Duration & Termination:</h3>
+                            <p class="text-slate-300">This authority remains in effect until your claim is completed and paid, or until you terminate it by notifying us in writing.</p>
+                        </div>
+                    </div>
+
+                    <!-- Digital Signature -->
+                    <div class="mt-6">
+                        <label class="text-sm font-medium text-slate-300 mb-2 block">Your Digital Signature <span class="text-red-400">*</span></label>
+                        <p class="text-xs text-slate-500 mb-2">Sign below using your finger (mobile) or mouse (desktop)</p>
+                        <canvas id="signaturePad" class="signature-pad w-full h-32 touch-none"></canvas>
+                        <button onclick="clearSignature()" class="mt-2 text-sm text-slate-400 hover:text-white">Clear Signature</button>
+                    </div>
+
+                    <div class="mt-6 space-y-3">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" id="authorityConfirm" class="mt-1 w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500 bg-slate-700">
+                            <span class="text-sm text-slate-300">I confirm that I have read and understood the above authority. I voluntarily authorize the agent to act on my behalf for the purpose of claiming my unclaimed money from IRD.</span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" id="identityConfirm" class="mt-1 w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500 bg-slate-700">
+                            <span class="text-sm text-slate-300">I confirm that all information provided is true and accurate, and I am the legal owner of the unclaimed money or authorized to act on behalf of the owner.</span>
+                        </label>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="customerPrevStep()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-medium transition-colors">Back</button>
+                        <button onclick="submitCustomerAuthorization()" class="flex-1 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition-all">Sign & Submit to Agent</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Confirmation -->
+            <div id="custStep5" class="step-content hidden fade-in text-center py-12">
+                <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-4">Authorization Submitted!</h2>
+                <p class="text-slate-400 mb-8 max-w-lg mx-auto">Your information, ID documents, and authority to act has been securely sent to our agents. We will contact you within 24 hours to confirm your claim submission to IRD.</p>
+                
+                <div class="glass-panel rounded-xl p-6 max-w-md mx-auto mb-8 text-left">
+                    <h3 class="text-white font-semibold mb-3">What happens next:</h3>
+                    <ol class="space-y-2 text-sm text-slate-300 list-decimal list-inside">
+                        <li>Agent reviews your submission and verifies ID (within 24 hours)</li>
+                        <li>We prepare and submit claim to IRD using your documents</li>
+                        <li>IRD processes claim (typically 10-12 weeks)</li>
+                        <li>Money deposited to your bank account</li>
+                    </ol>
+                </div>
+
+                <div class="bg-amber-900/20 border border-amber-500/30 rounded-xl p-4 max-w-md mx-auto">
+                    <p class="text-amber-400 text-sm">
+                        <span class="font-semibold">Reference Number:</span> <span id="customerRefNum" class="font-mono text-lg">-</span><br>
+                        Save this number for your records.
+                    </p>
+                </div>
+
+                <button onclick="location.reload()" class="mt-8 text-slate-400 hover:text-white text-sm">Submit another claim</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- AGENT PORTAL -->
+    <div id="agentPortal" class="hidden">
+        <!-- Login Screen -->
+        <div id="agentLogin" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+            <div class="glass-panel rounded-2xl p-8 max-w-md w-full">
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white text-center mb-6">Agent Login</h2>
+                <div class="space-y-4">
+                    <input type="password" id="agentPassword" placeholder="Enter agent password" class="input-field w-full px-4 py-3 rounded-xl text-center">
+                    <button onclick="agentLogin()" class="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white py-3 rounded-xl font-semibold transition-all">Access Dashboard</button>
+                    <button onclick="location.reload()" class="w-full text-slate-400 hover:text-white text-sm py-2">Back to Mode Selection</button>
+                </div>
+                <p class="text-xs text-slate-500 text-center mt-4">Default: "admin123" (change in production)</p>
+            </div>
+        </div>
+
+        <!-- Agent Dashboard -->
+        <div id="agentDashboard" class="hidden">
+            <nav class="glass-panel sticky top-0 z-40 border-b border-slate-700/50">
+                <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                        <span class="font-display font-bold text-xl">Agent<span class="text-emerald-400">Portal</span></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="showAgentSection('submissions')" class="text-sm text-slate-300 hover:text-white">New Submissions</button>
+                        <button onclick="showAgentSection('claims')" class="text-sm text-slate-300 hover:text-white">All Claims</button>
+                        <button onclick="agentLogout()" class="text-sm text-red-400 hover:text-red-300">Logout</button>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="max-w-7xl mx-auto px-4 py-8">
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="glass-panel rounded-xl p-4">
+                        <p class="text-slate-400 text-xs uppercase">New Today</p>
+                        <p class="text-2xl font-bold text-white" id="statNew">0</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4">
+                        <p class="text-slate-400 text-xs uppercase">Pending Action</p>
+                        <p class="text-2xl font-bold text-amber-400" id="statPending">0</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4">
+                        <p class="text-slate-400 text-xs uppercase">Submitted to IRD</p>
+                        <p class="text-2xl font-bold text-blue-400" id="statSubmitted">0</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4">
+                        <p class="text-slate-400 text-xs uppercase">Total Value</p>
+                        <p class="text-2xl font-bold text-emerald-400" id="statValue">$0</p>
+                    </div>
+                </div>
+
+                <!-- New Submissions Section -->
+                <div id="submissionsSection" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-white">New Customer Submissions</h2>
+                        <button onclick="exportSubmissions()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm">Export CSV</button>
+                    </div>
+                    
+                    <div class="glass-panel rounded-2xl overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-800/50 text-slate-400 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-4">Received</th>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">IRD Number</th>
+                                    <th class="px-6 py-4">Amount Found</th>
+                                    <th class="px-6 py-4">ID Provided</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissionsTable" class="divide-y divide-slate-700/50 text-sm"></tbody>
+                        </table>
+                        <div id="noSubmissions" class="hidden p-8 text-center text-slate-500">No new submissions</div>
+                    </div>
+                </div>
+
+                <!-- All Claims Section (Hidden by default) -->
+                <div id="claimsSection" class="hidden space-y-6">
+                    <h2 class="text-2xl font-bold text-white">All Claims Management</h2>
+                    <div class="glass-panel rounded-2xl p-4">
+                        <div class="flex gap-4 mb-4">
+                            <input type="text" id="claimSearch" placeholder="Search claims..." class="input-field px-4 py-2 rounded-lg flex-1" onkeyup="filterClaims()">
+                            <select id="claimFilter" class="input-field px-4 py-2 rounded-lg" onchange="filterClaims()">
+                                <option value="all">All Status</option>
+                                <option value="new">New</option>
+                                <option value="reviewing">Under Review</option>
+                                <option value="submitted">Submitted to IRD</option>
+                                <option value="pending">Pending IRD</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </div>
+                        <div id="allClaimsList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeDetailModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="glass-panel w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-600/50 p-6 my-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white" id="detailCustomerName">Customer Name</h2>
+                        <p class="text-slate-400">Ref: <span id="detailRef" class="font-mono">-</span></p>
+                    </div>
+                    <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div id="detailContent" class="space-y-6">
+                    <!-- Dynamic content -->
+                </div>
+
+                <div class="flex gap-3 mt-6 pt-6 border-t border-slate-700">
+                    <button onclick="updateClaimStatus('reviewing')" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white py-2 rounded-lg font-medium">Mark Reviewing</button>
+                    <button onclick="updateClaimStatus('submitted')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-medium">Mark Submitted</button>
+                    <button onclick="updateClaimStatus('paid')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg font-medium">Mark Paid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentMode = null;
+        let customerStep = 1;
+        let customerData = {};
+        let uploadedDocuments = {
+            primary: null,
+            secondary: null,
+            address: null
+        };
+        let submissions = JSON.parse(localStorage.getItem('irdSubmissions')) || [];
+        let signatureData = null;
+
+        // Mode Selection
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeSelector').classList.add('hidden');
+            
+            if (mode === 'customer') {
+                document.getElementById('customerPortal').classList.remove('hidden');
+                initSignaturePad();
+            } else {
+                document.getElementById('agentPortal').classList.remove('hidden');
+            }
+        }
+
+        // Customer Portal Functions
+        function updateCustomerProgress() {
+            const progress = ((customerStep - 1) / 4) * 100;
+            document.getElementById('customerProgress').style.width = progress + '%';
+            
+            document.querySelectorAll('.step-indicator').forEach((el, idx) => {
+                const stepNum = idx + 1;
+                el.classList.remove('step-active', 'bg-emerald-500', 'bg-slate-700');
+                if (stepNum === customerStep) {
+                    el.classList.add('step-active');
+                } else if (stepNum < customerStep) {
+                    el.classList.add('bg-emerald-500');
+                    el.innerHTML = '✓';
+                } else {
+                    el.classList.add('bg-slate-700');
+                    el.innerHTML = stepNum;
+                }
+            });
+        }
+
+        function showCustomerStep(step) {
+            document.querySelectorAll('#customerPortal .step-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('custStep' + step).classList.remove('hidden');
+            customerStep = step;
+            updateCustomerProgress();
+        }
+
+        function customerNextStep() {
+            if (customerStep < 5) showCustomerStep(customerStep + 1);
+        }
+
+        function customerPrevStep() {
+            if (customerStep > 1) showCustomerStep(customerStep - 1);
+        }
+
+        // IRD Search Simulation
+        function performCustomerSearch() {
+            const name = document.getElementById('customerSearchName').value.trim();
+            if (!name) return;
+
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Searching...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const mockResults = [
+                    {
+                        holder: 'ANZ Bank (Closed Account)',
+                        type: 'Dormant Bank Account',
+                        amount: 1247.50,
+                        year: '2019',
+                        ref: 'ANZ-' + Math.random().toString(36).substr(2, 6).toUpperCase()
+                    },
+                    {
+                        holder: 'Bonus Bonds',
+                        type: 'Unclaimed Winnings',
+                        amount: 85.00,
+                        year: '2020',
+                        ref: 'BB-' + Math.random().toString(36).substr(2, 6).toUpperCase()
+                    }
+                ];
+
+                const container = document.getElementById('customerResultsList');
+                container.innerHTML = mockResults.map((r, i) => `
+                    <div class="glass-panel rounded-xl p-4 border-l-4 border-emerald-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-white font-semibold">${r.holder}</p>
+                                <p class="text-sm text-slate-400">${r.type} • Last active: ${r.year}</p>
+                                <p class="text-xs text-slate-500 mt-1">Ref: ${r.ref}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-emerald-400">$${r.amount.toFixed(2)}</p>
+                                <label class="flex items-center gap-2 mt-2 cursor-pointer">
+                                    <input type="checkbox" class="claim-checkbox w-4 h-4 rounded border-slate-600 text-emerald-500" 
+                                        data-holder="${r.holder}" data-amount="${r.amount}" data-ref="${r.ref}">
+                                    <span class="text-sm text-slate-300">Claim this</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('customerSearchResults').classList.remove('hidden');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        }
+
+        function validateAndNext() {
+            const form = document.getElementById('customerDetailsForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const formData = new FormData(form);
+            customerData.details = Object.fromEntries(formData);
+            customerNextStep();
+        }
+
+        // ID Upload Functions
+        function handleIDUpload(input, type) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File too large. Max 5MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                uploadedDocuments[type] = {
+                    name: file.name,
+                    data: dataUrl,
+                    type: file.type,
+                    size: file.size
+                };
+
+                // Show preview
+                const img = document.getElementById(type + 'IDImg') || document.getElementById(type + 'ProofImg');
+                const previewDiv = document.getElementById(type + (type === 'address' ? 'ProofPreview' : 'IDPreview'));
+                const placeholder = document.getElementById(type + (type === 'address' ? 'ProofPlaceholder' : 'IDPlaceholder'));
+                const zone = document.getElementById(type === 'address' ? 'addressProofZone' : type + 'IDZone');
+                const removeBtn = document.getElementById(type + (type === 'address' ? 'ProofRemove' : 'IDRemove'));
+
+                img.src = dataUrl;
+                previewDiv.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                zone.classList.add('has-file');
+                removeBtn.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeID(type) {
+            uploadedDocuments[type] = null;
+            document.getElementById(type === 'address' ? 'addressProofInput' : type + 'IDInput').value = '';
+            
+            const previewDiv = document.getElementById(type + (type === 'address' ? 'ProofPreview' : 'IDPreview'));
+            const placeholder = document.getElementById(type + (type === 'address' ? 'ProofPlaceholder' : 'IDPlaceholder'));
+            const zone = document.getElementById(type === 'address' ? 'addressProofZone' : type + 'IDZone');
+            const removeBtn = document.getElementById(type + (type === 'address' ? 'ProofRemove' : 'IDRemove'));
+
+            previewDiv.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            zone.classList.remove('has-file');
+            removeBtn.classList.add('hidden');
+        }
+
+        function validateIDAndNext() {
+            if (!uploadedDocuments.primary) {
+                alert('Please upload your primary photo ID (Driver License, Passport, or Kiwi Access Card)');
+                return;
+            }
+            
+            if (!document.getElementById('idClearCheck').checked || 
+                !document.getElementById('idCurrentCheck').checked || 
+                !document.getElementById('idMatchesCheck').checked) {
+                alert('Please confirm all ID verification checkboxes');
+                return;
+            }
+            
+            customerNextStep();
+        }
+
+        // Signature Pad
+        function initSignaturePad() {
+            const canvas = document.getElementById('signaturePad');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+            
+            function start(e) {
+                drawing = true;
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                e.preventDefault();
+            }
+            
+            function draw(e) {
+                if (!drawing) return;
+                const pos = getPos(e);
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000';
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                e.preventDefault();
+            }
+            
+            function stop() {
+                drawing = false;
+                signatureData = canvas.toDataURL();
+            }
+            
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stop);
+            canvas.addEventListener('mouseout', stop);
+            
+            canvas.addEventListener('touchstart', start, {passive: false});
+            canvas.addEventListener('touchmove', draw, {passive: false});
+            canvas.addEventListener('touchend', stop);
+        }
+
+        function clearSignature() {
+            const canvas = document.getElementById('signaturePad');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            signatureData = null;
+        }
+
+        function submitCustomerAuthorization() {
+            if (!document.getElementById('authorityConfirm').checked || !document.getElementById('identityConfirm').checked) {
+                alert('Please check both confirmation boxes');
+                return;
+            }
+            if (!signatureData) {
+                alert('Please sign to authorize');
+                return;
+            }
+
+            const selectedMoney = [];
+            document.querySelectorAll('.claim-checkbox:checked').forEach(cb => {
+                selectedMoney.push({
+                    holder: cb.dataset.holder,
+                    amount: parseFloat(cb.dataset.amount),
+                    reference: cb.dataset.ref
+                });
+            });
+
+            const submission = {
+                id: 'UCM-' + Date.now(),
+                submittedAt: new Date().toISOString(),
+                customerData: customerData.details,
+                selectedMoney: selectedMoney,
+                documents: uploadedDocuments,
+                signature: signatureData,
+                status: 'new',
+                agentNotes: ''
+            };
+
+            submissions.unshift(submission);
+            localStorage.setItem('irdSubmissions', JSON.stringify(submissions));
+
+            document.getElementById('customerRefNum').textContent = submission.id;
+            customerNextStep();
+        }
+
+        // Agent Portal Functions
+        function agentLogin() {
+            const pwd = document.getElementById('agentPassword').value;
+            if (pwd === 'admin123') {
+                document.getElementById('agentLogin').classList.add('hidden');
+                document.getElementById('agentDashboard').classList.remove('hidden');
+                updateAgentStats();
+                renderSubmissions();
+            } else {
+                alert('Invalid password');
+            }
+        }
+
+        function agentLogout() {
+            location.reload();
+        }
+
+        function updateAgentStats() {
+            document.getElementById('statNew').textContent = submissions.filter(s => s.status === 'new').length;
+            document.getElementById('statPending').textContent = submissions.filter(s => s.status === 'reviewing' || s.status === 'submitted').length;
+            document.getElementById('statSubmitted').textContent = submissions.filter(s => s.status === 'submitted').length;
+            
+            const totalValue = submissions.reduce((sum, s) => {
+                return sum + s.selectedMoney.reduce((mSum, m) => mSum + m.amount, 0);
+            }, 0);
+            document.getElementById('statValue').textContent = '$' + totalValue.toLocaleString();
+        }
+
+        function renderSubmissions() {
+            const tbody = document.getElementById('submissionsTable');
+            const newSubmissions = submissions.filter(s => s.status === 'new');
+            
+            if (newSubmissions.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('noSubmissions').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('noSubmissions').classList.add('hidden');
+            tbody.innerHTML = newSubmissions.map(s => {
+                const totalAmount = s.selectedMoney.reduce((sum, m) => sum + m.amount, 0);
+                const hasPrimaryID = s.documents && s.documents.primary ? '✓ Yes' : '✗ No';
+                const idStatusColor = s.documents && s.documents.primary ? 'text-emerald-400' : 'text-red-400';
+                
+                return `
+                    <tr class="hover:bg-slate-800/30 transition-colors cursor-pointer" onclick="viewSubmission('${s.id}')">
+                        <td class="px-6 py-4 text-slate-400">${new Date(s.submittedAt).toLocaleString()}</td>
+                        <td class="px-6 py-4">
+                            <p class="text-white font-medium">${s.customerData.fullName}</p>
+                            <p class="text-xs text-slate-500">${s.customerData.email}</p>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-slate-300">${s.customerData.irdNumber}</td>
+                        <td class="px-6 py-4 font-bold text-emerald-400">$${totalAmount.toFixed(2)}</td>
+                        <td class="px-6 py-4 ${idStatusColor} text-sm">${hasPrimaryID}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded-full text-xs bg-blue-900/50 text-blue-400 border border-blue-500/30">New</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="event.stopPropagation(); viewSubmission('${s.id}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium">Review</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewSubmission(id) {
+            const sub = submissions.find(s => s.id === id);
+            if (!sub) return;
+            
+            document.getElementById('detailCustomerName').textContent = sub.customerData.fullName;
+            document.getElementById('detailRef').textContent = sub.id;
+            
+            const totalAmount = sub.selectedMoney.reduce((sum, m) => sum + m.amount, 0);
+            
+            // Build documents section
+            let docsHtml = '';
+            if (sub.documents) {
+                docsHtml = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+                
+                if (sub.documents.primary) {
+                    docsHtml += `
+                        <div class="space-y-2">
+                            <p class="text-xs text-slate-400 uppercase">Primary ID</p>
+                            <img src="${sub.documents.primary.data}" class="w-full h-32 object-cover rounded-lg border border-slate-600 cursor-pointer hover:opacity-80 transition-opacity" onclick="window.open('${sub.documents.primary.data}')" title="Click to enlarge">
+                            <p class="text-xs text-slate-500 truncate">${sub.documents.primary.name}</p>
+                        </div>
+                    `;
+                }
+                
+                if (sub.documents.secondary) {
+                    docsHtml += `
+                        <div class="space-y-2">
+                            <p class="text-xs text-slate-400 uppercase">Secondary ID</p>
+                            <img src="${sub.documents.secondary.data}" class="w-full h-32 object-cover rounded-lg border border-slate-600 cursor-pointer hover:opacity-80 transition-opacity" onclick="window.open('${sub.documents.secondary.data}')" title="Click to enlarge">
+                            <p class="text-xs text-slate-500 truncate">${sub.documents.secondary.name}</p>
+                        </div>
+                    `;
+                }
+                
+                if (sub.documents.address) {
+                    docsHtml += `
+                        <div class="space-y-2">
+                            <p class="text-xs text-slate-400 uppercase">Proof of Address</p>
+                            <img src="${sub.documents.address.data}" class="w-full h-32 object-cover rounded-lg border border-slate-600 cursor-pointer hover:opacity-80 transition-opacity" onclick="window.open('${sub.documents.address.data}')" title="Click to enlarge">
+                            <p class="text-xs text-slate-500 truncate">${sub.documents.address.name}</p>
+                        </div>
+                    `;
+                }
+                
+                docsHtml += '</div>';
+            }
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="bg-slate-800/50 rounded-lg p-3">
+                        <p class="text-slate-400 text-xs">IRD Number</p>
+                        <p class="text-white font-mono">${sub.customerData.irdNumber}</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-lg p-3">
+                        <p class="text-slate-400 text-xs">Date of Birth</p>
+                        <p class="text-white">${sub.customerData.dob}</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-lg p-3">
+                        <p class="text-slate-400 text-xs">Phone</p>
+                        <p class="text-white">${sub.customerData.phone}</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-lg p-3">
+                        <p class="text-slate-400 text-xs">Email</p>
+                        <p class="text-white">${sub.customerData.email}</p>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-lg p-4">
+                    <p class="text-slate-400 text-xs mb-1">Current Address</p>
+                    <p class="text-white">${sub.customerData.currentAddress}</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-lg p-4">
+                    <p class="text-slate-400 text-xs mb-1">Bank Account for Refund</p>
+                    <p class="text-white font-mono">${sub.customerData.bankAccount} (${sub.customerData.bankName})</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <p class="text-white font-semibold">Money to Claim:</p>
+                    ${sub.selectedMoney.map(m => `
+                        <div class="flex justify-between items-center bg-emerald-900/20 border border-emerald-500/30 rounded-lg p-3">
+                            <div>
+                                <p class="text-white text-sm">${m.holder}</p>
+                                <p class="text-xs text-slate-400">Ref: ${m.reference}</p>
+                            </div>
+                            <p class="text-emerald-400 font-bold">$${m.amount.toFixed(2)}</p>
+                        </div>
+                    `).join('')}
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+                        <p class="text-white font-semibold">Total</p>
+                        <p class="text-2xl font-bold text-emerald-400">$${totalAmount.toFixed(2)}</p>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h4 class="text-white font-semibold mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                        Uploaded Documents
+                    </h4>
+                    ${docsHtml || '<p class="text-slate-500 text-sm">No documents uploaded</p>'}
+                </div>
+                
+                <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                    <p class="text-blue-400 text-xs uppercase font-semibold mb-2">Authority to Act</p>
+                    <p class="text-sm text-slate-300 mb-2">Customer digitally signed authorization on ${new Date(sub.submittedAt).toLocaleString()}</p>
+                    <img src="${sub.signature}" class="h-16 bg-white rounded border border-slate-600" alt="Signature">
+                </div>
+            `;
+            
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        function updateClaimStatus(status) {
+            const ref = document.getElementById('detailRef').textContent;
+            const sub = submissions.find(s => s.id === ref);
+            if (sub) {
+                sub.status = status;
+                localStorage.setItem('irdSubmissions', JSON.stringify(submissions));
+                updateAgentStats();
+                renderSubmissions();
+                closeDetailModal();
+                alert('Status updated to: ' + status);
+            }
+        }
+
+        function showAgentSection(section) {
+            document.getElementById('submissionsSection').classList.add('hidden');
+            document.getElementById('claimsSection').classList.add('hidden');
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            if (section === 'claims') renderAllClaims();
+        }
+
+        function renderAllClaims() {
+            const container = document.getElementById('allClaimsList');
+            const filter = document.getElementById('claimFilter').value;
+            
+            let filtered = submissions;
+            if (filter !== 'all') filtered = submissions.filter(s => s.status === filter);
+            
+            container.innerHTML = filtered.map(s => {
+                const total = s.selectedMoney.reduce((sum, m) => sum + m.amount, 0);
+                const hasID = s.documents && s.documents.primary ? '✓ ID' : '✗ No ID';
+                const statusColors = {
+                    new: 'bg-blue-900/50 text-blue-400',
+                    reviewing: 'bg-amber-900/50 text-amber-400',
+                    submitted: 'bg-purple-900/50 text-purple-400',
+                    pending: 'bg-orange-900/50 text-orange-400',
+                    paid: 'bg-emerald-900/50 text-emerald-400'
+                };
+                
+                return `
+                    <div class="glass-panel rounded-xl p-4 flex justify-between items-center">
+                        <div>
+                            <p class="text-white font-medium">${s.customerData.fullName}</p>
+                            <p class="text-xs text-slate-400">${s.selectedMoney.length} items • ${hasID} • Submitted ${new Date(s.submittedAt).toLocaleDateString()}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <p class="text-emerald-400 font-bold">$${total.toFixed(2)}</p>
+                            <span class="px-3 py-1 rounded-full text-xs ${statusColors[s.status] || statusColors.new}">${s.status}</span>
+                            <button onclick="viewSubmission('${s.id}')" class="text-blue-400 hover:text-blue-300 text-sm">View</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterClaims() {
+            renderAllClaims();
+        }
+
+        function exportSubmissions() {
+            const csv = [
+                ['Reference', 'Date', 'Customer', 'IRD Number', 'Email', 'Phone', 'Total Amount', 'Has ID', 'Status'].join(','),
+                ...submissions.map(s => [
+                    s.id,
+                    new Date(s.submittedAt).toLocaleString(),
+                    `"${s.customerData.fullName}"`,
+                    s.customerData.irdNumber,
+                    s.customerData.email,
+                    s.customerData.phone,
+                    s.selectedMoney.reduce((sum, m) => sum + m.amount, 0),
+                    s.documents && s.documents.primary ? 'Yes' : 'No',
+                    s.status
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `submissions-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+    </script>
+</body>
+</html>
